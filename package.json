@@ -1,6 +1,6 @@
 {
   "name": "pathfinding-visualizer",
-  "homepage": "https://smayan-n.github.io/pathfinding-visualizer/",
+  "homepage": "https://smayan-n.github.io/pathfinding-visualizer/index.html",
   "private": true,
   "version": "0.0.0",
   "type": "module",
