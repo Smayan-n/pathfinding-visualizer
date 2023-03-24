@@ -1,0 +1,10 @@
+.clear-btn{
+    background-color: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 2vw;
+    flex-basis: 25%;
+}
