@@ -3,6 +3,6 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	base: "https://smayan-n.github.io/",
+	base: "https://github.com/Smayan-n/pathfinding-visualizer/tree/gh-pages",
 	plugins: [react()],
 });
