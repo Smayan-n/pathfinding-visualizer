@@ -1,0 +1,15 @@
+.control-section{
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+}
+
+.clear-btn{
+    background-color: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 2vw;
+}

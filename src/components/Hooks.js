@@ -1,5 +1,7 @@
 //file defines custom hooks
 import { useEffect, useRef } from "react";
+import { SimpleCanvas } from "../scripts/CanvasHelper.js";
+import { lerp } from "../scripts/Utility.js";
 
 function useOnDraw(onDraw) {
 	//use ref does not trigger re-render when value is changed

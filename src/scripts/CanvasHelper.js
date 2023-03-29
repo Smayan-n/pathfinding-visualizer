@@ -37,13 +37,13 @@ class SimpleCanvas {
 		this.ctx.closePath();
 	}
 
-	rect(x, y, width, height, text = "", color = "white", fill = true) {
+	rect(x, y, width, height, text = "", color = "white", fill = true, round = false) {
 		this.ctx.beginPath();
 		this.ctx.fillStyle = color;
 		this.ctx.strokeStyle = color;
 
 		if (fill) {
-			this.ctx.fillRect(x, y, width, height);
+			round ? this.ctx.roundRect(x, y, width, height, 5) : this.ctx.fillRect(x, y, width, height);
 			this.ctx.fill();
 		} else {
 			this.ctx.rect(x, y, width, height);

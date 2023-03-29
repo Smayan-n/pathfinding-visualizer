@@ -1,5 +1,7 @@
 import { useState } from "react";
 import CanvasSection from "./components/CanvasSection.jsx";
+import CanvasSection2 from "./components/CanvasSection2.jsx";
+import ControlSection from "./components/ControlSection.jsx";
 import "./styles/App.css";
 
 function App() {
@@ -9,12 +11,10 @@ function App() {
 		setClearCanvas(!clearCanvas);
 	}
 	return (
-		<div className="App">
-			<button onClick={handleClearCanvas} className="clear-btn">
-				Clear
-			</button>
-			<CanvasSection clearCanvasProps={[clearCanvas, handleClearCanvas]}></CanvasSection>
-		</div>
+		<section className="main-app">
+			<ControlSection onClearCanvas={handleClearCanvas}></ControlSection>
+			<CanvasSection2 clearCanvasProps={[clearCanvas, handleClearCanvas]}></CanvasSection2>
+		</section>
 	);
 }
 

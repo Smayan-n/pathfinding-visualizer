@@ -4,7 +4,7 @@ import { distance, interpolate, lerp } from "../scripts/Utility.js";
 import "../styles/CanvasSection.css";
 import { useOnDraw } from "./Hooks.js";
 
-const rows = 28;
+const rows = 30;
 const cols = 60;
 function CanvasSection(props) {
 	const [clearCanvas, onClearCanvas] = props.clearCanvasProps;
@@ -43,23 +43,22 @@ function CanvasSection(props) {
 		};
 	}, []);
 
+	//runs when component is mounted
 	useEffect(() => {
 		setupCells();
 	}, []);
 
+	//runs when clearCanvas changes
 	useEffect(() => {
 		if (clearCanvas) {
 			const ctx = canvasRef.current.getContext("2d");
 			ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+			//set all cell colors to white
 			cellsRef.current = cellsRef.current.map((row) => row.map((cell) => ({ ...cell, color: "white" })));
 			onClearCanvas();
 			setupCells();
 		}
 	}, [clearCanvas, onClearCanvas]);
-
-	useEffect(() => {
-		initCanvas(canvasRef.current.getContext("2d"));
-	}, [cellsRef.current]);
 
 	function setRef(ref) {
 		if (!ref) return;
@@ -79,7 +78,7 @@ function CanvasSection(props) {
 
 	//sets up cellsRef.current - positions
 	function setupCells() {
-		//set up empty 28x28 array
+		//set up empty array
 		const newCells = new Array(rows);
 		for (let i = 0; i < rows; i++) {
 			newCells[i] = new Array(cols);
@@ -119,33 +118,55 @@ function CanvasSection(props) {
 		prevPoint = prevPoint ? prevPoint : point;
 		const points = interpolate(prevPoint, point, 0.2);
 		points.forEach((point) => {
-			const cell = getCellAtPos(point);
-			queueAnimation(ctx, cell);
+			if (rightClick) {
+				eraseCell(ctx, point);
+			} else {
+				const cell = getCellAtPos(point);
+				queueAnimation(ctx, cell);
+			}
+			// const surr = getSurroundingCells(point);
+			// const cells = [...surr];
+
+			// let i = 0;
+			// const interval = setInterval(() => {
+			// 	queueAnimation(ctx, cells[i]);
+			// 	i++;
+			// 	if (i >= cells.length) clearInterval(interval);
+			// }, 200);
 		});
+	}
+
+	function eraseCell(ctx, point) {
+		const simpleCanvas = new SimpleCanvas(ctx);
+		const cell = getCellAtPos(point);
+		const { rowIndex, colIndex } = getCellIndices(cell);
+		simpleCanvas.rect(cell.x, cell.y, cellSizeRef.current - 1, cellSizeRef.current - 1, "", "white", true);
+		cellsRef.current[rowIndex][colIndex].color = "white";
 	}
 
 	function queueAnimation(ctx, cell) {
 		const simpleCanvas = new SimpleCanvas(ctx);
 		//i is animation counter
 		const animation = { cell: cell, i: cellSizeRef.current };
-		//only add new animation to queue if cell is not already being animated
+		//only add new animation to queue if cell is not already being animated and is not already drawn
 		if (
 			!animationQueueRef.current.some((anim) => {
 				return anim.cell === animation.cell;
-			})
+			}) &&
+			cell.color === "white"
 		) {
 			animationQueueRef.current.push(animation);
 			cellsRef.current = cellsRef.current.map((row) => {
 				return row.map((cell) => {
 					if (cell === animation.cell) {
-						cell.color = "brown";
+						cell.color = `rgba(${50}, ${240}, ${240}, 1)`;
 					}
 					return cell;
 				});
 			});
 		}
 
-		const animSpeed = 7; //ms
+		const animSpeed = 10; //speed for one cell animation in milliseconds
 
 		if (!animationRunningRef.current) {
 			animationRunningRef.current = true;
@@ -153,13 +174,16 @@ function CanvasSection(props) {
 			const interval = setInterval(() => {
 				for (let j = 0; j < animationQueueRef.current.length; j++) {
 					const animation = animationQueueRef.current[j];
+					const color = lerp(240, 150, animation.i / cellSizeRef.current);
 					simpleCanvas.rect(
 						animation.cell.x + animation.i / 2,
 						animation.cell.y + animation.i / 2,
-						cellSizeRef.current - animation.i,
-						cellSizeRef.current - animation.i,
+						cellSizeRef.current - animation.i - 1,
+						cellSizeRef.current - animation.i - 1,
 						"",
-						"brown"
+						animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
+						true, //fill?
+						animation.i > 0 //round?
 					);
 					//decrease animation counter
 					animation.i = animation.i - 1;
@@ -179,13 +203,32 @@ function CanvasSection(props) {
 		}
 	}
 
+	function getSurroundingCells(point) {
+		const surrPixels = [];
+		const { rowIndex, colIndex } = getCellIndices(point);
+		if (colIndex + 1 <= cols) {
+			surrPixels.push(cellsRef.current[rowIndex][colIndex + 1]);
+		}
+		if (rowIndex + 1 <= cols) {
+			surrPixels.push(cellsRef.current[rowIndex + 1][colIndex]);
+		}
+		if (colIndex - 1 >= 0) {
+			surrPixels.push(cellsRef.current[rowIndex][colIndex - 1]);
+		}
+		if (rowIndex - 1 >= 0) {
+			surrPixels.push(cellsRef.current[rowIndex - 1][colIndex]);
+		}
+
+		return surrPixels;
+	}
+
 	//returns a cell at given x, y coord
 	function getCellAtPos(point) {
-		const indices = getPixelIndices(point);
+		const indices = getCellIndices(point);
 		return cellsRef.current[indices.rowIndex][indices.colIndex];
 	}
 
-	function getPixelIndices(point) {
+	function getCellIndices(point) {
 		return {
 			rowIndex: Math.floor(point.y < 0 ? 0 : point.y / cellSizeRef.current),
 			colIndex: Math.floor(point.x < 0 ? 0 : point.x / cellSizeRef.current),
