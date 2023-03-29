@@ -36,6 +36,23 @@ class CanvasRenderer {
 		}
 	}
 
+	fill() {
+		if (this.ctx) {
+			this.maze.cells.forEach((row) => {
+				row.forEach((cell) => {
+					this.simpleCanvas.rect(
+						cell.x + 1,
+						cell.y + 1,
+						this.maze.cellSize - 1,
+						this.maze.cellSize - 1,
+						"",
+						"green"
+					);
+				});
+			});
+		}
+	}
+
 	clearCell(cell) {
 		if (this.ctx) {
 			this.simpleCanvas.rect(cell.x, cell.y, this.maze.cellSize - 1, this.maze.cellSize - 1, "", "white", true);
@@ -55,6 +72,10 @@ class CanvasRenderer {
 			this.animationQueue.push(animation);
 		}
 
+		this.startAnimation();
+	}
+
+	startAnimation() {
 		const animSpeed = 10; //speed for one cell animation in milliseconds
 
 		//add ctx null check
@@ -91,18 +112,6 @@ class CanvasRenderer {
 				}
 			}, animSpeed);
 		}
-	}
-
-	getCellAtPos(point) {
-		const indices = getCellIndices(point);
-		return maze.cells[indices.rowIndex][indices.colIndex];
-	}
-
-	getCellIndices(point) {
-		return {
-			rowIndex: Math.floor(point.y < 0 ? 0 : point.y / maze.cellSize),
-			colIndex: Math.floor(point.x < 0 ? 0 : point.x / maze.cellSize),
-		};
 	}
 }
 

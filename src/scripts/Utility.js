@@ -19,4 +19,9 @@ function lerp(a, b, t) {
 	return (1 - t) * a + t * b;
 }
 
-export { interpolate, distance, lerp };
+//return random int between min and max inclusive
+function randInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export { interpolate, distance, lerp, randInt };
