@@ -46,11 +46,11 @@ function useOnDraw(onDraw) {
 
 	const onMouseMove = (e) => {
 		const point = getPointOnCanvas(e.clientX, e.clientY);
-		if (mouseDownRef.current) {
-			const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true });
-			onDraw(ctx, point, prevPosRef.current, mouseButtonRef.current === 2 ? true : false);
-			prevPosRef.current = point;
-		}
+		// if (mouseDownRef.current) {
+		const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true });
+		onDraw(ctx, point, prevPosRef.current, mouseDownRef.current, mouseButtonRef.current === 2);
+		prevPosRef.current = point;
+		// }
 	};
 
 	const getPointOnCanvas = (x, y) => {

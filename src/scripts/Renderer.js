@@ -8,6 +8,13 @@ class CanvasRenderer {
 
 		this.animationQueue = [];
 		this.animationRunning = false;
+		this.animSpeed = 8; //speed for one cell animation in milliseconds
+
+		this.wallColor = "rgb(34, 61, 112)";
+		this.pathColor = "white";
+		this.startColor = "green";
+		this.endColor = "red";
+		this.typeColorMap = { wall: this.wallColor, path: this.pathColor, start: this.startColor, end: this.endColor };
 	}
 
 	setCanvasContext(ctx) {
@@ -21,53 +28,56 @@ class CanvasRenderer {
 			this.maze.cells.forEach((row) => {
 				row.forEach((cell) => {
 					const cellSize = this.maze.cellSize;
+					const pos = this.maze.getCellPos(cell.index);
 					//grid
-					this.simpleCanvas.rect(cell.x, cell.y, cellSize, cellSize, "", "black", false);
+					this.simpleCanvas.rect(pos.x, pos.y, cellSize, cellSize, "", "black", false);
 					//color cells
-					this.simpleCanvas.rect(cell.x, cell.y, cellSize, cellSize, "", cell.color, true);
-				});
-			});
-		}
-	}
-
-	clear() {
-		if (this.ctx) {
-			this.ctx.clearRect(0, 0, this.maze.cols * this.maze.cellSize, this.maze.rows * this.maze.cellSize);
-		}
-	}
-
-	fill() {
-		if (this.ctx) {
-			this.maze.cells.forEach((row) => {
-				row.forEach((cell) => {
 					this.simpleCanvas.rect(
-						cell.x + 1,
-						cell.y + 1,
-						this.maze.cellSize - 1,
-						this.maze.cellSize - 1,
+						pos.x,
+						pos.y,
+						cellSize - 1,
+						cellSize - 1,
 						"",
-						"green"
+						this.typeColorMap[cell.type],
+						true
 					);
 				});
 			});
 		}
 	}
 
-	clearCell(cell) {
-		if (this.ctx) {
-			this.simpleCanvas.rect(cell.x, cell.y, this.maze.cellSize - 1, this.maze.cellSize - 1, "", "white", true);
-		}
+	//animation for complete board fill / clear
+	queueFullAnimation(flag) {
+		return new Promise((resolve) => {
+			let r = 0;
+			const interval = setInterval(
+				() => {
+					const rows = this.maze.cells[r];
+					rows.forEach((cell) => {
+						this.queueAnimation(cell.index);
+					});
+					r++;
+					if (r >= this.maze.rows) {
+						clearInterval(interval);
+						resolve(true);
+					}
+				},
+				flag === "fill" ? 30 : 10
+			);
+		});
 	}
 
-	queueAnimation(cell) {
+	//will animate cell at given index based on its type(wall or path)
+	queueAnimation(index) {
+		const cell = this.maze.cells[index.row][index.col];
 		//i is animation counter
 		const animation = { cell: cell, i: this.maze.cellSize };
-		//only add new animation to queue if cell is not already being animated and is not already drawn
+		//only add new animation to queue if cell is not already being animated
+		//*and is not already drawn
 		if (
 			!this.animationQueue.some((anim) => {
 				return anim.cell === animation.cell;
-			}) &&
-			cell.color === "white"
+			})
 		) {
 			this.animationQueue.push(animation);
 		}
@@ -76,8 +86,6 @@ class CanvasRenderer {
 	}
 
 	startAnimation() {
-		const animSpeed = 10; //speed for one cell animation in milliseconds
-
 		//add ctx null check
 		if (!this.animationRunning) {
 			this.animationRunning = true;
@@ -85,14 +93,16 @@ class CanvasRenderer {
 			const interval = setInterval(() => {
 				for (let j = 0; j < this.animationQueue.length; j++) {
 					const animation = this.animationQueue[j];
-					const color = lerp(240, 150, animation.i / this.maze.cellSize);
+					const pos = this.maze.getCellPos(animation.cell.index);
+
 					this.simpleCanvas.rect(
-						animation.cell.x + animation.i / 2,
-						animation.cell.y + animation.i / 2,
+						pos.x + animation.i / 2,
+						pos.y + animation.i / 2,
 						this.maze.cellSize - animation.i - 1,
 						this.maze.cellSize - animation.i - 1,
 						"",
-						animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
+						this.typeColorMap[animation.cell.type],
+						// animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
 						true, //fill?
 						animation.i > 0 //round?
 					);
@@ -110,7 +120,7 @@ class CanvasRenderer {
 					this.animationRunning = false;
 					clearInterval(interval);
 				}
-			}, animSpeed);
+			}, this.animSpeed);
 		}
 	}
 }

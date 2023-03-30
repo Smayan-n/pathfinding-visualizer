@@ -24,4 +24,8 @@ function randInt(min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export { interpolate, distance, lerp, randInt };
+function indexEquals(index1, index2) {
+	return index1.row === index2.row && index1.col === index2.col;
+}
+
+export { interpolate, distance, lerp, randInt, indexEquals };

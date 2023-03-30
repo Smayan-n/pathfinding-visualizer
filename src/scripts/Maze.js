@@ -1,75 +1,77 @@
 import { SimpleCanvas } from "./CanvasHelper";
+import { indexEquals } from "./Utility";
 
 class Maze {
 	constructor() {
 		this.rows = 28;
 		this.cols = 60;
 
+		//start and end cell indexes
+		this.start = { row: 10, col: 10 };
+		this.end = { row: 10, col: 50 };
+		this.onStart = null;
+
 		this.cellSize = 20;
-		//objects with following fields {x, y, color, type}
-		//type can be: path, wall, ...
+		//objects with following fields {index: {row, col}, type}
+		//type can be: path, wall, start, end
 		this.cells = null;
 
-		this.wallColor = `rgba(${50}, ${240}, ${240}, 1)`;
+		this.setupCells();
 	}
 
-	setupCells(generated) {
+	setupCells() {
 		const newCells = new Array(this.rows);
 		for (let i = 0; i < this.rows; i++) {
 			newCells[i] = new Array(this.cols);
 		}
 
-		//store top-left positions of cellsRef.current in array
+		//store indexes of cells in array
 		for (let row = 0; row < this.rows; row += 1) {
 			for (let col = 0; col < this.cols; col += 1) {
-				let color = null;
-				if (generated) {
-					color = generated[row][col] === 1 ? "green" : "white";
-				}
+				const index = { row: row, col: col };
 				newCells[row][col] = {
-					x: col * this.cellSize,
-					y: row * this.cellSize,
-					color: this.cells ? this.cells[row][col].color : "white",
-					// color: color ? color : "white",
-					type: this.cells ? this.cells[row][col].type : "path",
+					index: index,
+					type: indexEquals(index, this.start) ? "start" : indexEquals(index, this.end) ? "end" : "path",
 				};
 			}
 		}
 		this.cells = newCells;
-		//init canvas
 	}
 
-	addWall(cell) {
-		const { ridx, cidx } = this.getCellIndices(cell);
-		this.cells[ridx][cidx].color = this.wallColor;
-		this.cells[ridx][cidx].type = "wall";
+	setStart(index) {
+		//update start cell type
+		this.cells[this.start.row][this.start.col].type = "path";
+		this.start = index;
+		this.cells[index.row][index.col].type = "start";
+	}
+
+	addWall(index) {
+		this.cells[index.row][index.col].type = "wall";
+	}
+
+	addPath(index) {
+		this.cells[index.row][index.col].type = "path";
 	}
 
 	clearCells() {
-		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, color: "white", type: "path" })));
+		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, type: "path" })));
 	}
 
 	fillCells() {
-		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, color: this.wallColor, type: "wall" })));
+		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, type: "wall" })));
 	}
 
-	clearCell(cell) {
-		const { ridx, cidx } = this.getCellIndices(cell);
-		this.cells[ridx][cidx].color = "white";
-		this.cells[ridx][cidx].type = "path";
-	}
-
-	//returns a cell at given x, y coord
-	getCellAtPos(point) {
-		const indices = this.getCellIndices(point);
-		return this.cells[indices.ridx][indices.cidx];
-	}
-
-	getCellIndices(cell) {
+	//returns index {row, col} of cell at given position
+	getCellIndex(point) {
 		return {
-			ridx: Math.floor(cell.y < 0 ? 0 : cell.y / this.cellSize),
-			cidx: Math.floor(cell.x < 0 ? 0 : cell.x / this.cellSize),
+			row: Math.floor(point.y < 0 ? 0 : point.y / this.cellSize),
+			col: Math.floor(point.x < 0 ? 0 : point.x / this.cellSize),
 		};
+	}
+
+	//returns coord on canvas based on index
+	getCellPos(index) {
+		return { x: index.col * this.cellSize, y: index.row * this.cellSize };
 	}
 }
 

@@ -15,24 +15,30 @@ function App() {
 		setClearCanvas(!clearCanvas);
 	}
 
-	function handleGenerate() {
+	function handleGenerate(option) {
+		//option: 0 = DFS, 1 = Recursive Division, 2 = Prim's Algorithm
 		const rows = 28;
 		const cols = 60;
 		const start = new Array(rows);
 		for (let i = 0; i < rows; i++) {
 			start[i] = new Array(cols).fill(1);
 		}
-		// const walls = [];
-		// const generated = recursiveDivision(start, walls, { start: 0, end: rows }, { start: 0, end: cols });
 
-		const empty = [];
-		const generated = dfsGenerator(start, empty);
-		// console.log(generated);
+		//array with all walls/path
+		const fill = [];
+		let generated = [];
+		if (option == 0) {
+			//DFS
+			generated = dfsGenerator(start, fill);
+		} else if (option == 1) {
+			//Recursive Division
+			generated = recursiveDivision(start, fill, { start: 0, end: rows }, { start: 0, end: cols });
+		} else if (option == 2) {
+			//Prim's Algorithm
+			generated = primsAlgorithm(start, fill);
+		}
 
-		// const generated = primsAlgorithm(start, empty);
-		// console.log(generated, empty);
-
-		setGenerated(empty);
+		setGenerated({ option: option, generated: fill });
 	}
 
 	return (

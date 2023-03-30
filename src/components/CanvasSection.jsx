@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { SimpleCanvas } from "../scripts/CanvasHelper.js";
 import Maze from "../scripts/Maze.js";
 import CanvasRenderer from "../scripts/Renderer.js";
-import { distance, interpolate, lerp } from "../scripts/Utility.js";
+import { distance, indexEquals, interpolate, lerp } from "../scripts/Utility.js";
 import "../styles/CanvasSection.css";
 import { useOnDraw } from "./Hooks.js";
 
@@ -17,7 +17,7 @@ function CanvasSection(props) {
 	const windowResizeListenerRef = useRef(null);
 	const canvasRef = useRef(null);
 
-	//effect sets up resize listener and initializes cellPositions
+	// effect sets up resize listener and initializes cellPositions
 	useEffect(() => {
 		const windowResizeListener = (e) => {
 			const canvas = canvasRef.current;
@@ -25,7 +25,6 @@ function CanvasSection(props) {
 				const canvasSize = getCanvasSize();
 				canvas.width = canvasSize.width;
 				canvas.height = canvasSize.height;
-				maze.setupCells();
 				renderer.renderMaze();
 			}
 		};
@@ -38,46 +37,47 @@ function CanvasSection(props) {
 		};
 	}, []);
 
-	//runs when component is mounted
+	//runs when component is rendered
 	useEffect(() => {
 		//give renderer canvas context when component is mounted
-		renderer.setCanvasContext(canvasRef.current.getContext("2d"));
-		maze.setupCells();
+		renderer.setCanvasContext(canvasRef.current.getContext("2d", { willReadFrequently: true }));
 		renderer.renderMaze();
-	}, []);
+	}, [clearCanvas, generated]);
 
 	useEffect(() => {
-		renderer.fill();
-		maze.fillCells();
-		if (generated) {
+		const generateMaze = async () => {
+			if (generated.option == 0 || generated.option == 2) {
+				maze.fillCells();
+				await renderer.queueFullAnimation("fill");
+			} else {
+				maze.clearCells();
+				await renderer.queueFullAnimation("clear");
+			}
+
 			let i = 0;
 			const interval = setInterval(() => {
-				const cell = {
-					x: generated[i][1] * maze.cellSize,
-					y: generated[i][0] * maze.cellSize,
-					color: "white",
-					type: "path",
-				};
-				renderer.queueAnimation(cell);
-				maze.addWall(cell);
+				const index = { row: generated.generated[i][0], col: generated.generated[i][1] };
+				generated.option == 1 ? maze.addWall(index) : maze.addPath(index);
+				renderer.queueAnimation(index);
+
 				i++;
-				if (i >= generated.length) {
+				if (i >= generated.generated.length) {
 					clearInterval(interval);
 				}
 			}, 10);
-		}
+		};
+		if (generated) generateMaze();
 	}, [generated]);
 
 	//runs when clearCanvas changes
 	useEffect(() => {
-		if (clearCanvas) {
+		const clear = async () => {
 			maze.clearCells();
-			renderer.clear();
-			maze.setupCells();
-			renderer.renderMaze();
-			onClearCanvas();
-		}
-	}, [clearCanvas, onClearCanvas]);
+			await renderer.queueFullAnimation("clear");
+			setTimeout(() => onClearCanvas(), 100);
+		};
+		if (clearCanvas) clear();
+	}, [clearCanvas]);
 
 	function setRef(ref) {
 		if (!ref) return;
@@ -96,59 +96,35 @@ function CanvasSection(props) {
 	}
 
 	//callback function that runs when mouse button is pressed and mouse is moving on canvas - loop function
-	function handleDraw(ctx, point, prevPoint, rightClick) {
-		prevPoint = prevPoint ? prevPoint : point;
-		const points = interpolate(prevPoint, point, 0.2);
+	function handleDraw(ctx, point, prevPoint, mouseDown, rightClick) {
+		if (mouseDown) {
+			prevPoint = prevPoint ? prevPoint : point;
+			const points = interpolate(prevPoint, point, 0.1);
 
-		points.forEach((point) => {
-			const cell = maze.getCellAtPos(point);
-			if (rightClick) {
-				maze.clearCell(cell);
-				renderer.clearCell(cell);
-			} else {
-				//only works in this order for some reason
-				renderer.queueAnimation(cell);
-				maze.addWall(cell);
-			}
+			points.forEach((point) => {
+				//note. CAUTION: cell is a reference to the cell in maze.cells - might break
+				const index = maze.getCellIndex(point);
+				if (indexEquals(index, maze.start)) {
+					maze.onStart = true;
+				} else if (rightClick) {
+					maze.addPath(index);
+					renderer.queueAnimation(index);
+				} else {
+					maze.addWall(index);
+					renderer.queueAnimation(index);
+				}
 
-			// const surr = getSurroundingCells(point);
-			// const cells = [...surr];
-
-			// let i = 0;
-			// const interval = setInterval(() => {
-			// 	renderer.queueAnimation(cells[i]);
-			// 	maze.addWall(cells[i]);
-			// 	i++;
-			// 	if (i >= cells.length) clearInterval(interval);
-			// }, 200);
-		});
+				if (maze.onStart == false) {
+					console.log(maze.onStart);
+					maze.setStart(index);
+					renderer.renderMaze();
+					maze.onStart = null;
+				}
+			});
+		}
+		if (maze.onStart) maze.onStart = false;
 	}
 
-	function getSurroundingCells(point) {
-		const surrPixels = [];
-		const { rowIndex, colIndex } = getCellIndices(point);
-		if (colIndex + 1 <= maze.cols) {
-			surrPixels.push(maze.cells[rowIndex][colIndex + 1]);
-		}
-		if (rowIndex + 1 <= maze.cols) {
-			surrPixels.push(maze.cells[rowIndex + 1][colIndex]);
-		}
-		if (colIndex - 1 >= 0) {
-			surrPixels.push(maze.cells[rowIndex][colIndex - 1]);
-		}
-		if (rowIndex - 1 >= 0) {
-			surrPixels.push(maze.cells[rowIndex - 1][colIndex]);
-		}
-
-		return surrPixels;
-	}
-
-	function getCellIndices(cell) {
-		return {
-			rowIndex: Math.floor(cell.y < 0 ? 0 : cell.y / maze.cellSize),
-			colIndex: Math.floor(cell.x < 0 ? 0 : cell.x / maze.cellSize),
-		};
-	}
 	//---------------------------------------------//
 	return (
 		<section className="canvas-section">
