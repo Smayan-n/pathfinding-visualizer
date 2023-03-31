@@ -50,7 +50,7 @@ class SimpleCanvas {
 		}
 		this.ctx.stroke();
 
-		this.ctx.font = "bold 24px Arial";
+		this.ctx.font = "bold 15px Arial";
 		//center text
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseLine = "middle";

@@ -14,7 +14,16 @@ class CanvasRenderer {
 		this.pathColor = "white";
 		this.startColor = "green";
 		this.endColor = "red";
-		this.typeColorMap = { wall: this.wallColor, path: this.pathColor, start: this.startColor, end: this.endColor };
+		this.exploredColor = "rgb(219, 160, 51)";
+		this.solutionColor = "rgb(237, 237, 24)";
+		this.typeColorMap = {
+			wall: this.wallColor,
+			path: this.pathColor,
+			start: this.startColor,
+			end: this.endColor,
+			explored: this.exploredColor,
+			solution: this.solutionColor,
+		};
 	}
 
 	setCanvasContext(ctx) {
@@ -44,6 +53,24 @@ class CanvasRenderer {
 				});
 			});
 		}
+	}
+
+	//animates a given array of states based on type
+	queueStatesAnimation(states, type, animSpeed) {
+		return new Promise((resolve) => {
+			let i = 0;
+			const interval = setInterval(() => {
+				const index = { row: states[i].row, col: states[i].col };
+				this.maze.addCell(index, type);
+				this.queueAnimation(index);
+
+				i++;
+				if (i >= states.length) {
+					clearInterval(interval);
+					resolve(true);
+				}
+			}, animSpeed);
+		});
 	}
 
 	//animation for complete board fill / clear
@@ -95,13 +122,19 @@ class CanvasRenderer {
 					const animation = this.animationQueue[j];
 					const pos = this.maze.getCellPos(animation.cell.index);
 
+					//colors
+					const from = { red: 255, green: 0, blue: 0 };
+					const red = lerp(34, from.red, animation.i / this.maze.cellSize);
+					const green = lerp(61, from.green, animation.i / this.maze.cellSize);
+					const blue = lerp(112, from.blue, animation.i / this.maze.cellSize);
+
 					this.simpleCanvas.rect(
 						pos.x + animation.i / 2,
 						pos.y + animation.i / 2,
 						this.maze.cellSize - animation.i - 1,
 						this.maze.cellSize - animation.i - 1,
 						"",
-						this.typeColorMap[animation.cell.type],
+						`rgb(${red}, ${green}, ${blue})`,
 						// animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
 						true, //fill?
 						animation.i > 0 //round?

@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { SimpleCanvas } from "../scripts/CanvasHelper.js";
-import Maze from "../scripts/Maze.js";
-import CanvasRenderer from "../scripts/Renderer.js";
 import { distance, indexEquals, interpolate, lerp } from "../scripts/Utility.js";
 import "../styles/CanvasSection.css";
 import { useOnDraw } from "./Hooks.js";
 
 function CanvasSection(props) {
-	const { generated, clearCanvasProps } = props;
+	const { generated, pathfindSolution, clearCanvasProps, functionalObjects } = props;
 	const [clearCanvas, onClearCanvas] = clearCanvasProps;
-
-	const [maze, setMaze] = useState(new Maze());
-	const [renderer, setRenderer] = useState(new CanvasRenderer(maze));
+	const [maze, renderer] = functionalObjects;
 
 	const { onMouseDown, onMouseMove, setCanvasRef } = useOnDraw(handleDraw);
 	const windowResizeListenerRef = useRef(null);
@@ -42,10 +38,11 @@ function CanvasSection(props) {
 		//give renderer canvas context when component is mounted
 		renderer.setCanvasContext(canvasRef.current.getContext("2d", { willReadFrequently: true }));
 		renderer.renderMaze();
-	}, [clearCanvas, generated]);
+	}, [clearCanvas, generated, pathfindSolution]);
 
 	useEffect(() => {
 		const generateMaze = async () => {
+			//clear or fill cells depending on algorithm
 			if (generated.option == 0 || generated.option == 2) {
 				maze.fillCells();
 				await renderer.queueFullAnimation("fill");
@@ -54,27 +51,41 @@ function CanvasSection(props) {
 				await renderer.queueFullAnimation("clear");
 			}
 
-			let i = 0;
-			const interval = setInterval(() => {
-				const index = { row: generated.generated[i][0], col: generated.generated[i][1] };
-				generated.option == 1 ? maze.addWall(index) : maze.addPath(index);
-				renderer.queueAnimation(index);
-
-				i++;
-				if (i >= generated.generated.length) {
-					clearInterval(interval);
-				}
-			}, 10);
+			await renderer.queueStatesAnimation(generated.generated, generated.option == 1 ? "wall" : "path", 10);
 		};
 		if (generated) generateMaze();
 	}, [generated]);
+
+	useEffect(() => {
+		const pathfind = async () => {
+			//clear all explored and solution cells
+			maze.clearCells("explored");
+			maze.clearCells("solution");
+			await renderer.queueFullAnimation("clear");
+
+			setTimeout(async () => {
+				const { solution, explored } = pathfindSolution;
+
+				if (solution) {
+					await renderer.queueStatesAnimation(explored, "explored", 15);
+					//to ensure complete animation
+					setTimeout(async () => await renderer.queueStatesAnimation(solution, "solution", 25), 50);
+				} else {
+					await renderer.queueStatesAnimation(explored, "explored", 15);
+					console.log("No solution found");
+				}
+			}, 100);
+		};
+		if (pathfindSolution) pathfind();
+	}, [pathfindSolution]);
 
 	//runs when clearCanvas changes
 	useEffect(() => {
 		const clear = async () => {
 			maze.clearCells();
 			await renderer.queueFullAnimation("clear");
-			setTimeout(() => onClearCanvas(), 100);
+			//after delay to ensure complete clear animation
+			setTimeout(() => onClearCanvas(), 500);
 		};
 		if (clearCanvas) clear();
 	}, [clearCanvas]);
@@ -107,22 +118,14 @@ function CanvasSection(props) {
 				if (indexEquals(index, maze.start)) {
 					maze.onStart = true;
 				} else if (rightClick) {
-					maze.addPath(index);
+					maze.addCell(index, "path");
 					renderer.queueAnimation(index);
 				} else {
-					maze.addWall(index);
+					maze.addCell(index, "wall");
 					renderer.queueAnimation(index);
-				}
-
-				if (maze.onStart == false) {
-					console.log(maze.onStart);
-					maze.setStart(index);
-					renderer.renderMaze();
-					maze.onStart = null;
 				}
 			});
 		}
-		if (maze.onStart) maze.onStart = false;
 	}
 
 	//---------------------------------------------//

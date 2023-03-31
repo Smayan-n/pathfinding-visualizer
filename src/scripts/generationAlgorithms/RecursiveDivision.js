@@ -25,7 +25,7 @@ function recursiveDivision(maze, walls, rowRange, colRange) {
 
 		for (let row = rowRange.start; row < rowRange.end; row++) {
 			maze[row][wallCol] = row === openRow ? 0 : 1;
-			row === openRow ? null : walls.push([row, wallCol]);
+			row === openRow ? null : walls.push({ row: row, col: wallCol });
 		}
 
 		recursiveDivision(maze, walls, rowRange, { start: colRange.start, end: wallCol });
@@ -47,7 +47,7 @@ function recursiveDivision(maze, walls, rowRange, colRange) {
 
 		for (let col = colRange.start; col < colRange.end; col++) {
 			maze[wallRow][col] = col === openCol ? 0 : 1;
-			col === openCol ? null : walls.push([wallRow, col]);
+			col === openCol ? null : walls.push({ row: wallRow, col: col });
 		}
 
 		recursiveDivision(maze, walls, { start: rowRange.start, end: wallRow }, colRange);

@@ -3,20 +3,24 @@ import { indexEquals } from "./Utility";
 
 class Maze {
 	constructor() {
-		this.rows = 28;
-		this.cols = 60;
+		this.rows = 20;
+		this.cols = 50;
 
 		//start and end cell indexes
-		this.start = { row: 10, col: 10 };
-		this.end = { row: 10, col: 50 };
-		this.onStart = null;
+		this.start = { row: 5, col: 5 };
+		this.end = { row: 5, col: 20 };
+		this.onStart = false;
 
 		this.cellSize = 20;
 		//objects with following fields {index: {row, col}, type}
-		//type can be: path, wall, start, end
+		//type can be: path, wall, start, end, explored, solution
 		this.cells = null;
 
 		this.setupCells();
+	}
+
+	getType(index) {
+		return this.cells[index.row][index.col].type;
 	}
 
 	setupCells() {
@@ -45,20 +49,29 @@ class Maze {
 		this.cells[index.row][index.col].type = "start";
 	}
 
-	addWall(index) {
-		this.cells[index.row][index.col].type = "wall";
+	addCell(index, type) {
+		//make sure to not remove start and end cells
+		if (!indexEquals(index, this.start) && !indexEquals(index, this.end)) {
+			this.cells[index.row][index.col].type = type;
+		}
 	}
 
-	addPath(index) {
-		this.cells[index.row][index.col].type = "path";
+	//clears cells of given type(clears all if no choice)
+	clearCells(type) {
+		this.cells.forEach((row) => {
+			row.forEach((cell) => {
+				if (type == null || cell.type === type) {
+					this.addCell(cell.index, "path");
+				}
+			});
+		});
 	}
 
-	clearCells() {
-		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, type: "path" })));
-	}
-
+	//fills cells with walls
 	fillCells() {
-		this.cells = this.cells.map((row) => row.map((cell) => ({ ...cell, type: "wall" })));
+		this.cells.forEach((row) => {
+			row.forEach((cell) => this.addCell(cell.index, "wall"));
+		});
 	}
 
 	//returns index {row, col} of cell at given position

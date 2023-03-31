@@ -28,4 +28,33 @@ function indexEquals(index1, index2) {
 	return index1.row === index2.row && index1.col === index2.col;
 }
 
-export { interpolate, distance, lerp, randInt, indexEquals };
+function getNeighbors(index, rows, cols) {
+	const { row, col } = index;
+	const candidates = [
+		["left", { row: row, col: col - 1 }],
+		["up", { row: row - 1, col: col }],
+		["right", { row: row, col: col + 1 }],
+		["down", { row: row + 1, col: col }],
+	];
+
+	//validate neighbors
+	const approved = [];
+	candidates.forEach((candidate) => {
+		const [action, index] = candidate;
+		//make sure candidate is not outside maze bounds
+		if (0 <= index.row && index.row < rows && 0 <= index.col && index.col < cols) {
+			approved.push(candidate);
+		}
+	});
+	return approved;
+}
+// function to shuffle an array
+function shuffle(arr) {
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr;
+}
+
+export { interpolate, distance, lerp, randInt, indexEquals, getNeighbors, shuffle };

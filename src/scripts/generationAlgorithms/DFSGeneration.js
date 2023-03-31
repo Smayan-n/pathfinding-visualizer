@@ -1,4 +1,4 @@
-import { randInt } from "../Utility";
+import { randInt, shuffle } from "../Utility";
 function dfsGenerator(maze, empty) {
 	const randC = randInt(0, maze[0].length - 1);
 	const randR = randInt(0, maze.length - 1);
@@ -19,7 +19,7 @@ function dfsGeneratorRecursive(maze, empty, row, col) {
 					if (maze[row - 2][col] !== 0) {
 						maze[row - 2][col] = 0;
 						maze[row - 1][col] = 0;
-						empty.push([row - 1, col], [row - 2, col]);
+						empty.push({ row: row - 1, col: col }, { row: row - 2, col: col });
 						dfsGeneratorRecursive(maze, empty, row - 2, col);
 					}
 				}
@@ -30,7 +30,7 @@ function dfsGeneratorRecursive(maze, empty, row, col) {
 					if (maze[row][col + 2] !== 0) {
 						maze[row][col + 2] = 0;
 						maze[row][col + 1] = 0;
-						empty.push([row, col + 1], [row, col + 2]);
+						empty.push({ row: row, col: col + 1 }, { row: row, col: col + 2 });
 						dfsGeneratorRecursive(maze, empty, row, col + 2);
 					}
 				}
@@ -41,7 +41,7 @@ function dfsGeneratorRecursive(maze, empty, row, col) {
 					if (maze[row + 2][col] !== 0) {
 						maze[row + 2][col] = 0;
 						maze[row + 1][col] = 0;
-						empty.push([row + 1, col], [row + 2, col]);
+						empty.push({ row: row + 1, col: col }, { row: row + 2, col: col });
 						dfsGeneratorRecursive(maze, empty, row + 2, col);
 					}
 				}
@@ -52,7 +52,7 @@ function dfsGeneratorRecursive(maze, empty, row, col) {
 					if (maze[row][col - 2] !== 0) {
 						maze[row][col - 2] = 0;
 						maze[row][col - 1] = 0;
-						empty.push([row, col - 1], [row, col - 2]);
+						empty.push({ row: row, col: col - 1 }, { row: row, col: col - 2 });
 						dfsGeneratorRecursive(maze, empty, row, col - 2);
 					}
 				}
@@ -64,15 +64,6 @@ function dfsGeneratorRecursive(maze, empty, row, col) {
 	}
 
 	return maze;
-}
-
-// function to shuffle an array
-function shuffle(arr) {
-	for (let i = arr.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[arr[i], arr[j]] = [arr[j], arr[i]];
-	}
-	return arr;
 }
 
 export default dfsGenerator;
