@@ -71,7 +71,7 @@ class CanvasRenderer {
 	}
 
 	//animates a given array of states to given type
-	queueStatesAnimation(states, type, animSpeed) {
+	queueStatesAnimation(states, type, animSpeed, onNumStatesChange) {
 		//make sure states is not empty
 		if (states.length === 0)
 			return new Promise((resolve) => {
@@ -85,6 +85,12 @@ class CanvasRenderer {
 				const index = { row: states[i].row, col: states[i].col };
 				this.maze.addCell(index, type);
 				this.queueAnimation(index);
+
+				if (type === "explored") {
+					onNumStatesChange({ explored: i + 1, solution: 0 });
+				} else if (type === "solution") {
+					onNumStatesChange({ explored: -1, solution: i + 1 });
+				}
 
 				i++;
 				if (i >= states.length) {
@@ -117,10 +123,10 @@ class CanvasRenderer {
 	}
 
 	//will animate cell at given index based on its type(wall or path)
-	queueAnimation(index) {
+	queueAnimation(index, startOffSet = 0) {
 		const cell = this.maze.cells[index.row][index.col];
 		//i is animation counter
-		const animation = { cell: cell, i: this.maze.cellSize };
+		const animation = { cell: cell, i: this.maze.cellSize - startOffSet };
 		//only add new animation to queue if cell is not already being animated
 		//*and is not already drawn
 		if (

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import CanvasSection from "./components/CanvasSection.jsx";
 import ControlSection from "./components/ControlSection.jsx";
+import Maze from "./scripts/Maze.js";
+import CanvasRenderer from "./scripts/Renderer.js";
+import { randInt } from "./scripts/Utility.js";
 import dfsGenerator from "./scripts/generationAlgorithms/DFSGeneration.js";
 import primsAlgorithm from "./scripts/generationAlgorithms/PrimsAlgorithm.js";
 import recursiveDivision from "./scripts/generationAlgorithms/RecursiveDivision.js";
-import Maze from "./scripts/Maze.js";
 import pathfind from "./scripts/pathfindingAlgorithms/Pathfinding.js";
-import CanvasRenderer from "./scripts/Renderer.js";
-import { randInt } from "./scripts/Utility.js";
 import "./styles/App.css";
 
 function App() {
@@ -18,13 +18,24 @@ function App() {
 	const [maze, setMaze] = useState(new Maze());
 	const [renderer, setRenderer] = useState(new CanvasRenderer(maze));
 
+	const [numStates, setNumStates] = useState({ explored: 0, solution: 0 });
+
+	function handleNumStatesChange(changed) {
+		const { explored, solution } = changed;
+		//if explored is -1, it is total explored states
+		//if solution is -1, there is no solution
+		setNumStates({
+			explored: explored === -1 ? pathfindSolution.explored.length : explored,
+			solution: solution,
+		});
+	}
+
 	function handleClearCanvas() {
 		setClearCanvas(!clearCanvas);
 	}
 
 	function handlePathfind(option) {
 		const { solution, explored } = pathfind(maze, option);
-		console.log(explored.length, solution.length);
 
 		setPathfindSolution({ option: option, solution: solution, explored: explored });
 	}
@@ -59,12 +70,14 @@ function App() {
 				onPathfind={handlePathfind}
 				onGenerate={handleGenerate}
 				onClearCanvas={handleClearCanvas}
+				numStates={numStates}
 			></ControlSection>
 			<CanvasSection
 				generated={generated}
 				pathfindSolution={pathfindSolution}
 				functionalObjects={[maze, renderer]}
 				clearCanvasProps={[clearCanvas, handleClearCanvas]}
+				onNumStatesChange={handleNumStatesChange}
 			></CanvasSection>
 		</section>
 	);

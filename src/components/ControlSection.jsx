@@ -2,7 +2,7 @@ import "../styles/ControlSection.css";
 import DropDown from "./Dropdown";
 
 function ControlSection(props) {
-	const { onClearCanvas, onGenerate, onPathfind } = props;
+	const { onClearCanvas, onGenerate, onPathfind, numStates } = props;
 
 	function handleGenerationOptionClick(e) {
 		//index of the option clicked
@@ -26,19 +26,31 @@ function ControlSection(props) {
 	];
 	return (
 		<section className="control-section">
-			<button onClick={onClearCanvas} className="clear-btn">
-				Clear
-			</button>
-			<DropDown
-				title="Maze Generation"
-				options={generationOptions}
-				onOptionClick={handleGenerationOptionClick}
-			></DropDown>
-			<DropDown
-				title="Path Finding"
-				options={pathFindingOptions}
-				onOptionClick={handlePathfindingOptionClick}
-			></DropDown>
+			<section className="input-section">
+				<button onClick={onClearCanvas} className="clear-btn">
+					Clear
+				</button>
+				<DropDown
+					title="Maze Generation"
+					options={generationOptions}
+					onOptionClick={handleGenerationOptionClick}
+				></DropDown>
+				<DropDown
+					title="Path Finding"
+					options={pathFindingOptions}
+					onOptionClick={handlePathfindingOptionClick}
+				></DropDown>
+			</section>
+			<section className="display-section">
+				<section className="states-info">
+					<div>States Explored: {numStates.explored}</div>
+					{numStates.solution === -1 ? (
+						<div style={{ color: "red" }}>No Solution</div>
+					) : (
+						<div>Solution States: {numStates.solution}</div>
+					)}
+				</section>
+			</section>
 		</section>
 	);
 }
