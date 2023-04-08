@@ -7,9 +7,10 @@ class Maze {
 		this.cols = 50;
 
 		//start and end cell indexes
-		this.start = { row: 5, col: 5 };
-		this.end = { row: 5, col: 20 };
-		this.onStart = false;
+		this.start = { row: 0, col: 0 };
+		this.end = { row: 18, col: 40 };
+		this.onStartClick = false;
+		this.onEndClick = false;
 
 		this.cellSize = 20;
 		//objects with following fields {index: {row, col}, type}
@@ -44,9 +45,22 @@ class Maze {
 
 	setStart(index) {
 		//update start cell type
-		this.cells[this.start.row][this.start.col].type = "path";
+		const oldStart = this.start;
+		this.addCell(index, "start");
 		this.start = index;
-		this.cells[index.row][index.col].type = "start";
+		this.addCell(oldStart, "path");
+
+		return oldStart;
+	}
+
+	setEnd(index) {
+		//update start cell type
+		const oldEnd = this.end;
+		this.addCell(index, "end");
+		this.end = index;
+		this.addCell(oldEnd, "path");
+
+		return oldEnd;
 	}
 
 	addCell(index, type) {
@@ -57,14 +71,18 @@ class Maze {
 	}
 
 	//clears cells of given type(clears all if no choice)
+	//returns true if any cells were cleared
 	clearCells(type) {
+		let cleared = false;
 		this.cells.forEach((row) => {
 			row.forEach((cell) => {
 				if (type == null || cell.type === type) {
 					this.addCell(cell.index, "path");
+					cleared = true;
 				}
 			});
 		});
+		return cleared;
 	}
 
 	//fills cells with walls
@@ -76,8 +94,11 @@ class Maze {
 
 	//returns index {row, col} of cell at given position
 	getCellIndex(point) {
+		//check for bounds too
 		return {
-			row: Math.floor(point.y < 0 ? 0 : point.y / this.cellSize),
+			row: Math.floor(
+				point.y < 0 ? 0 : point.y >= this.rows * this.cellSize ? this.rows - 1 : point.y / this.cellSize
+			),
 			col: Math.floor(point.x < 0 ? 0 : point.x / this.cellSize),
 		};
 	}

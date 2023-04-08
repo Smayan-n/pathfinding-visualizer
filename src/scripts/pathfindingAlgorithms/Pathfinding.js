@@ -57,10 +57,13 @@ function pathfind(maze, algorithm) {
 			//if neighbor is not a wall, and not already explored, add it to the frontier
 			if (
 				maze.getType(index) !== "wall" &&
-				!exploredStates.some((exploredIndex) => indexEquals(exploredIndex, index)) &&
-				!frontier.containsState(index)
+				!exploredStates.some((exploredIndex) => indexEquals(exploredIndex, index))
 			) {
 				const childNode = new Node(index, currNode, action);
+				//if node is already in frontier, remove that node and add new childNode instead
+				// if (frontier.containsState(index)) {
+				// 	frontier.removeNodeWithState(index);
+				// }
 				frontier.add(childNode);
 			}
 		});

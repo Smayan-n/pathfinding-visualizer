@@ -8,7 +8,7 @@ class CanvasRenderer {
 
 		this.animationQueue = [];
 		this.animationRunning = false;
-		this.animSpeed = 8; //speed for one cell animation in milliseconds
+		this.animSpeed = 10; //speed for one cell animation in milliseconds
 
 		this.wallColor = "rgb(34, 61, 112)";
 		this.pathColor = "white";
@@ -55,9 +55,31 @@ class CanvasRenderer {
 		}
 	}
 
-	//animates a given array of states based on type
+	drawCell(index) {
+		const cell = this.maze.cells[index.row][index.col];
+		const pos = this.maze.getCellPos(index);
+		this.simpleCanvas.rect(
+			pos.x,
+			pos.y,
+			this.maze.cellSize - 1,
+			this.maze.cellSize - 1,
+			"",
+			this.typeColorMap[cell.type],
+			true, //fill?
+			false
+		);
+	}
+
+	//animates a given array of states to given type
 	queueStatesAnimation(states, type, animSpeed) {
+		//make sure states is not empty
+		if (states.length === 0)
+			return new Promise((resolve) => {
+				resolve(true);
+			});
+
 		return new Promise((resolve) => {
+			//loop through states and animate the to given type
 			let i = 0;
 			const interval = setInterval(() => {
 				const index = { row: states[i].row, col: states[i].col };
@@ -128,13 +150,27 @@ class CanvasRenderer {
 					const green = lerp(61, from.green, animation.i / this.maze.cellSize);
 					const blue = lerp(112, from.blue, animation.i / this.maze.cellSize);
 
+					const heuristic =
+						Math.abs(animation.cell.index.row - this.maze.end.row) +
+						Math.abs(animation.cell.index.col - this.maze.end.col);
+
+					const actualCost =
+						Math.abs(animation.cell.index.row - this.maze.start.row) +
+						Math.abs(animation.cell.index.col - this.maze.start.col);
+
+					let tieBreaker = Math.sqrt(
+						Math.pow(animation.cell.index.row - this.maze.end.row, 2) +
+							Math.pow(animation.cell.index.col - this.maze.end.col, 2)
+					);
+					tieBreaker = tieBreaker.toFixed(2);
+
 					this.simpleCanvas.rect(
 						pos.x + animation.i / 2,
 						pos.y + animation.i / 2,
 						this.maze.cellSize - animation.i - 1,
 						this.maze.cellSize - animation.i - 1,
 						"",
-						`rgb(${red}, ${green}, ${blue})`,
+						this.typeColorMap[animation.cell.type],
 						// animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
 						true, //fill?
 						animation.i > 0 //round?

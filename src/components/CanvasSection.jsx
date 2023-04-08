@@ -108,6 +108,12 @@ function CanvasSection(props) {
 
 	//callback function that runs when mouse button is pressed and mouse is moving on canvas - loop function
 	function handleDraw(ctx, point, prevPoint, mouseDown, rightClick) {
+		if (indexEquals(maze.start, maze.getCellIndex(point)) || indexEquals(maze.end, maze.getCellIndex(point))) {
+			canvasRef.current.style.cursor = "grabbing";
+		} else {
+			canvasRef.current.style.cursor = "pointer";
+		}
+
 		if (mouseDown) {
 			prevPoint = prevPoint ? prevPoint : point;
 			const points = interpolate(prevPoint, point, 0.1);
@@ -115,9 +121,29 @@ function CanvasSection(props) {
 			points.forEach((point) => {
 				//note. CAUTION: cell is a reference to the cell in maze.cells - might break
 				const index = maze.getCellIndex(point);
+
+				//for moving start and end cells
 				if (indexEquals(index, maze.start)) {
-					maze.onStart = true;
-				} else if (rightClick) {
+					maze.onStartClick = true;
+				}
+				if (indexEquals(index, maze.end)) {
+					maze.onEndClick = true;
+				}
+				if (maze.onStartClick) {
+					const oldStart = maze.setStart(index);
+					renderer.drawCell(oldStart);
+					renderer.drawCell(index);
+					return;
+				}
+				if (maze.onEndClick) {
+					const oldEnd = maze.setEnd(index);
+					renderer.drawCell(oldEnd);
+					renderer.drawCell(index);
+					return;
+				}
+
+				//for adding and erasing walls
+				if (rightClick) {
 					maze.addCell(index, "path");
 					renderer.queueAnimation(index);
 				} else {
@@ -126,6 +152,8 @@ function CanvasSection(props) {
 				}
 			});
 		}
+		maze.onStartClick = false;
+		maze.onEndClick = false;
 	}
 
 	//---------------------------------------------//

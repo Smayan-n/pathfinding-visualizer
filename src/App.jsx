@@ -24,6 +24,7 @@ function App() {
 
 	function handlePathfind(option) {
 		const { solution, explored } = pathfind(maze, option);
+		console.log(explored.length, solution.length);
 
 		setPathfindSolution({ option: option, solution: solution, explored: explored });
 	}

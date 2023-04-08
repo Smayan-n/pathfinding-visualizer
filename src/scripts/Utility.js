@@ -31,10 +31,10 @@ function indexEquals(index1, index2) {
 function getNeighbors(index, rows, cols) {
 	const { row, col } = index;
 	const candidates = [
-		["left", { row: row, col: col - 1 }],
 		["up", { row: row - 1, col: col }],
-		["right", { row: row, col: col + 1 }],
 		["down", { row: row + 1, col: col }],
+		["left", { row: row, col: col - 1 }],
+		["right", { row: row, col: col + 1 }],
 	];
 
 	//validate neighbors
