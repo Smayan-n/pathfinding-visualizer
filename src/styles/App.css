@@ -3,6 +3,5 @@
 .main-app{
     display: flex;
     flex-direction: column;
-    color: rgb(34, 61, 112);
     gap:20px;
 }

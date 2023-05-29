@@ -156,19 +156,19 @@ class CanvasRenderer {
 					const green = lerp(61, from.green, animation.i / this.maze.cellSize);
 					const blue = lerp(112, from.blue, animation.i / this.maze.cellSize);
 
-					const heuristic =
-						Math.abs(animation.cell.index.row - this.maze.end.row) +
-						Math.abs(animation.cell.index.col - this.maze.end.col);
+					// const heuristic =
+					// 	Math.abs(animation.cell.index.row - this.maze.end.row) +
+					// 	Math.abs(animation.cell.index.col - this.maze.end.col);
 
-					const actualCost =
-						Math.abs(animation.cell.index.row - this.maze.start.row) +
-						Math.abs(animation.cell.index.col - this.maze.start.col);
+					// const actualCost =
+					// 	Math.abs(animation.cell.index.row - this.maze.start.row) +
+					// 	Math.abs(animation.cell.index.col - this.maze.start.col);
 
-					let tieBreaker = Math.sqrt(
-						Math.pow(animation.cell.index.row - this.maze.end.row, 2) +
-							Math.pow(animation.cell.index.col - this.maze.end.col, 2)
-					);
-					tieBreaker = tieBreaker.toFixed(2);
+					// let tieBreaker = Math.sqrt(
+					// 	Math.pow(animation.cell.index.row - this.maze.end.row, 2) +
+					// 		Math.pow(animation.cell.index.col - this.maze.end.col, 2)
+					// );
+					// tieBreaker = tieBreaker.toFixed(2);
 
 					this.simpleCanvas.rect(
 						pos.x + animation.i / 2,

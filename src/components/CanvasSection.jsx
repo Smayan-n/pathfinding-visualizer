@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { SimpleCanvas } from "../scripts/CanvasHelper.js";
-import { distance, indexEquals, interpolate, lerp } from "../scripts/Utility.js";
+import { distance, getCanvasSize, indexEquals, interpolate, lerp } from "../scripts/Utility.js";
 import "../styles/CanvasSection.css";
 import { useOnDraw } from "./Hooks.js";
 
 function CanvasSection(props) {
-	const { generated, pathfindSolution, clearCanvasProps, functionalObjects, onNumStatesChange } = props;
+	const { dimsChange, generated, pathfindSolution, clearCanvasProps, functionalObjects, onNumStatesChange } = props;
 	const [clearCanvas, onClearCanvas] = clearCanvasProps;
 	const [maze, renderer] = functionalObjects;
 
@@ -18,7 +18,7 @@ function CanvasSection(props) {
 		const windowResizeListener = (e) => {
 			const canvas = canvasRef.current;
 			if (canvas) {
-				const canvasSize = getCanvasSize();
+				const canvasSize = getCanvasSize(maze);
 				canvas.width = canvasSize.width;
 				canvas.height = canvasSize.height;
 				renderer.renderMaze();
@@ -38,7 +38,7 @@ function CanvasSection(props) {
 		//give renderer canvas context when component is mounted
 		renderer.setCanvasContext(canvasRef.current.getContext("2d", { willReadFrequently: true }));
 		renderer.renderMaze();
-	}, [clearCanvas, generated, pathfindSolution]);
+	}, [clearCanvas, generated, pathfindSolution, dimsChange]);
 
 	//for maze generation
 	useEffect(() => {
@@ -75,6 +75,7 @@ function CanvasSection(props) {
 						async () => await renderer.queueStatesAnimation(solution, "solution", 25, onNumStatesChange),
 						50
 					);
+					//if there is no solution, just animate all explored cells.
 				} else {
 					await renderer.queueStatesAnimation(explored, "explored", 15, onNumStatesChange);
 					onNumStatesChange({ explored: explored.length, solution: -1 });
@@ -99,16 +100,6 @@ function CanvasSection(props) {
 		if (!ref) return;
 		canvasRef.current = ref;
 		setCanvasRef(ref);
-	}
-
-	//returns canvas size - width and height
-	//also sets cellSize
-	function getCanvasSize() {
-		const winWidth = Math.floor(window.innerWidth) - 10;
-		const rem = winWidth % maze.cols;
-		maze.cellSize = Math.floor((winWidth - rem) / maze.cols);
-		const canvasSize = { width: winWidth - rem, height: maze.rows * maze.cellSize };
-		return canvasSize;
 	}
 
 	//callback function that runs when mouse button is pressed and mouse is moving on canvas - loop function
@@ -169,8 +160,8 @@ function CanvasSection(props) {
 		<section className="canvas-section">
 			{/*ref prop takes a function and passes in the reference of canvas*/}
 			<canvas
-				width={getCanvasSize().width}
-				height={getCanvasSize().height}
+				width={getCanvasSize(maze).width}
+				height={getCanvasSize(maze).height}
 				onMouseDown={onMouseDown}
 				onMouseMove={onMouseMove}
 				ref={setRef}

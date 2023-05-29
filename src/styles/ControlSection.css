@@ -1,22 +1,49 @@
 .control-section{
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    gap:20px;
     background-color: rgb(55, 55, 55);
+    gap:20px;
+    padding:10px;
 }
-
-.input-section{
+.app-title{
+    font-size: 1.8vw;
+    color: white;
+    text-align: center;
+    padding: 5px;
+    color: aqua;
+}
+.control-section .top-bar{
     display: flex;
     flex-direction: row;
-    padding: 20px;
-    gap:20px;
-
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    color: white;
 }
+.top-section{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.bottom-info-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 5px;
+}
+
+
+
+
 
 .display-section{
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content:  center;
     gap:10px;
     color: white;
 }
@@ -34,6 +61,23 @@
     border: none;
     cursor: pointer;
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px;
     font-size: 2vw;
+}
+
+.start-btn{
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 2vw;
+}
+.settings-section{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: white;
 }

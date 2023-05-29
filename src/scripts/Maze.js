@@ -2,13 +2,13 @@ import { SimpleCanvas } from "./CanvasHelper";
 import { indexEquals } from "./Utility";
 
 class Maze {
-	constructor() {
-		this.rows = 20;
-		this.cols = 50;
+	constructor(rows = 19, cols = 50) {
+		this.rows = rows;
+		this.cols = cols;
 
 		//start and end cell indexes
-		this.start = { row: 0, col: 0 };
-		this.end = { row: 18, col: 40 };
+		this.start = { row: 1, col: 1 };
+		this.end = { row: rows - 2, col: cols - 2 };
 		this.onStartClick = false;
 		this.onEndClick = false;
 
@@ -22,6 +22,15 @@ class Maze {
 
 	getType(index) {
 		return this.cells[index.row][index.col].type;
+	}
+
+	setDimensions(rows, cols) {
+		this.rows = rows;
+		this.cols = cols;
+		//set start and end points
+		this.start = { row: 1, col: 1 };
+		this.end = { row: rows - 2, col: cols - 2 };
+		this.setupCells();
 	}
 
 	setupCells() {

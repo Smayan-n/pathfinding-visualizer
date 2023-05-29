@@ -20,6 +20,33 @@ function App() {
 
 	const [numStates, setNumStates] = useState({ explored: 0, solution: 0 });
 
+	const [dimsChange, setDimsChange] = useState(0);
+
+	function handleGridDimsChange(rows, cols) {
+		maze.setDimensions(rows, cols);
+		setDimsChange(!dimsChange);
+		try {
+			let result;
+			eval(
+				`function evalFunc(x){ 
+					if(x <= 0){
+						console.log('base case')
+					}
+					else{
+						console.log(x);
+						evalFunc(x - 1); 
+					}
+				} 
+				evalFunc(10);
+				result = 10; 
+				`
+			);
+			console.log("eval return:" + result);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	function handleNumStatesChange(changed) {
 		const { explored, solution } = changed;
 		//if explored is -1, it is total explored states
@@ -70,9 +97,11 @@ function App() {
 				onPathfind={handlePathfind}
 				onGenerate={handleGenerate}
 				onClearCanvas={handleClearCanvas}
+				onGridDimsChange={handleGridDimsChange}
 				numStates={numStates}
 			></ControlSection>
 			<CanvasSection
+				dimsChange={dimsChange}
 				generated={generated}
 				pathfindSolution={pathfindSolution}
 				functionalObjects={[maze, renderer]}

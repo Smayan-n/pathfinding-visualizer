@@ -27,7 +27,7 @@ function pathfind(maze, algorithm) {
 		//if frontier is empty, no solution exists
 		if (frontier.empty()) return { solution: null, explored: exploredStates };
 
-		//remove node from frontier to explore
+		//remove node from frontier to explore based on algorithm
 		let currNode;
 		if (algorithm >= 2) {
 			currNode = frontier.removeLowestCostNode(algorithm, maze.end);

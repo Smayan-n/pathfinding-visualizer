@@ -57,4 +57,15 @@ function shuffle(arr) {
 	return arr;
 }
 
-export { interpolate, distance, lerp, randInt, indexEquals, getNeighbors, shuffle };
+//returns canvas size - width and height
+//maze cell size is also set here - maybe change that
+function getCanvasSize(maze) {
+	const winWidth = Math.floor(window.innerWidth) - 10;
+	const rem = winWidth % maze.cols;
+	maze.cellSize = Math.floor((winWidth - rem) / maze.cols);
+	const canvasSize = { width: winWidth - rem, height: maze.rows * maze.cellSize };
+
+	return canvasSize;
+}
+
+export { interpolate, distance, lerp, randInt, indexEquals, getNeighbors, shuffle, getCanvasSize };
