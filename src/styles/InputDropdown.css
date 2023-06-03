@@ -1,0 +1,32 @@
+
+
+
+.dims-input-section{
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.dims-input-section input{
+    border: none;
+    outline: none;
+    height: 26px;
+    font-size: 17px;
+}
+
+
+.speed-input-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.speed-input-section input{
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* Chromium */
+    width: 20px;
+    height: 100px;
+    padding: 5px;
+    direction: ltr;
+}

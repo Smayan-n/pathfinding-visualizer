@@ -22,29 +22,31 @@ function App() {
 
 	const [dimsChange, setDimsChange] = useState(0);
 
-	function handleGridDimsChange(rows, cols) {
-		maze.setDimensions(rows, cols);
+	function handleGridDimsChange(dims) {
+		console.log(dims);
+		maze.setDimensions(dims.rows, dims.cols);
 		setDimsChange(!dimsChange);
-		try {
-			let result;
-			eval(
-				`function evalFunc(x){ 
-					if(x <= 0){
-						console.log('base case')
-					}
-					else{
-						console.log(x);
-						evalFunc(x - 1); 
-					}
-				} 
-				evalFunc(10);
-				result = 10; 
-				`
-			);
-			console.log("eval return:" + result);
-		} catch (err) {
-			console.log(err);
-		}
+
+		// try {
+		// 	let result;
+		// 	eval(
+		// 		`function evalFunc(x){
+		// 			if(x <= 0){
+		// 				console.log('base case')
+		// 			}
+		// 			else{
+		// 				console.log(x);
+		// 				evalFunc(x - 1);
+		// 			}
+		// 		}
+		// 		evalFunc(10);
+		// 		result = 10;
+		// 		`
+		// 	);
+		// 	console.log("eval return:" + result);
+		// } catch (err) {
+		// 	console.log(err);
+		// }
 	}
 
 	function handleNumStatesChange(changed) {
@@ -59,6 +61,10 @@ function App() {
 
 	function handleClearCanvas() {
 		setClearCanvas(!clearCanvas);
+	}
+
+	function handleSpeedChange(newSpeed) {
+		renderer.setAnimSpeed(newSpeed);
 	}
 
 	function handlePathfind(option) {
@@ -76,16 +82,17 @@ function App() {
 
 		//array with all walls/path
 		const fill = [];
-		let generated = [];
+		let generatedOut = [];
 		if (option == 0) {
 			//DFS
-			generated = dfsGenerator(start, fill);
+			generatedOut = dfsGenerator(start, fill);
 		} else if (option == 1) {
 			//Recursive Division
-			generated = recursiveDivision(start, fill, { start: 0, end: maze.rows }, { start: 0, end: maze.cols });
+			generatedOut = recursiveDivision(start, fill, { start: 0, end: maze.rows }, { start: 0, end: maze.cols });
 		} else if (option == 2) {
 			//Prim's Algorithm
-			generated = primsAlgorithm(start, fill);
+			console.log(maze.rows, maze.cols);
+			generatedOut = primsAlgorithm(start, fill);
 		}
 
 		setGenerated({ option: option, generated: fill });
@@ -98,7 +105,10 @@ function App() {
 				onGenerate={handleGenerate}
 				onClearCanvas={handleClearCanvas}
 				onGridDimsChange={handleGridDimsChange}
+				onSpeedChange={handleSpeedChange}
 				numStates={numStates}
+				renderer={renderer}
+				maze={maze}
 			></ControlSection>
 			<CanvasSection
 				dimsChange={dimsChange}

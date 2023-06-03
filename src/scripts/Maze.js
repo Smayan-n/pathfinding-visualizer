@@ -2,7 +2,7 @@ import { SimpleCanvas } from "./CanvasHelper";
 import { indexEquals } from "./Utility";
 
 class Maze {
-	constructor(rows = 19, cols = 50) {
+	constructor(rows = 18, cols = 50) {
 		this.rows = rows;
 		this.cols = cols;
 

@@ -8,7 +8,7 @@ class CanvasRenderer {
 
 		this.animationQueue = [];
 		this.animationRunning = false;
-		this.animSpeed = 10; //speed for one cell animation in milliseconds
+		this.animSpeed = 10; //speed for one cell animation in milliseconds - lower is faster
 
 		this.wallColor = "rgb(34, 61, 112)";
 		this.pathColor = "white";
@@ -29,6 +29,10 @@ class CanvasRenderer {
 	setCanvasContext(ctx) {
 		this.ctx = ctx;
 		this.simpleCanvas = new SimpleCanvas(this.ctx);
+	}
+
+	setAnimSpeed(newSpeed) {
+		this.animSpeed = newSpeed;
 	}
 
 	//draws grid and fills cells with their respective colors

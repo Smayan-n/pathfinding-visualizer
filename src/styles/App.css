@@ -1,7 +1,16 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+:root{
+    --hover-color: aqua;
+    --bar-bg-color: rgb(47, 46, 46);
+    --bar-secondary-color: rgb(55, 55, 55);
+}
 
 .main-app{
     display: flex;
     flex-direction: column;
     gap:20px;
+    font-family: poppins;
+    margin-bottom: 15px;
 }

@@ -1,30 +1,23 @@
 import React, { useRef, useState } from "react";
 import "../styles/ControlSection.css";
 import DropDown from "./Dropdown";
+import InputDropdown from "./InputDropdown";
 
 function ControlSection(props) {
-	const { onClearCanvas, onGenerate, onPathfind, onGridDimsChange, numStates } = props;
-
-	const rowsInputRef = useRef(null);
-	const colsInputRef = useRef(null);
+	const { onClearCanvas, onGenerate, onPathfind, onGridDimsChange, numStates, onSpeedChange, renderer, maze } = props;
 
 	const [generationOption, setGenerationOption] = useState(-1);
 	const [pathfindingOption, setPathfindingOption] = useState(-1);
 
+	const [animSpeed, setAnimSpeed] = useState(10);
+	const [gridDims, setGridDims] = useState({ rows: 18, cols: 50 });
+
 	function handleGenerationOptionClick(e) {
-		//index of the option clicked
-		// const option = parseInt(e.target.getAttribute("value"));
-		// setGenerationAlgorithm(generationOptions[option]);
-		// onGenerate(option);
 		setGenerationOption(parseInt(e.target.getAttribute("value")));
 		setPathfindingOption(-1);
 	}
 
 	function handlePathfindingOptionClick(e) {
-		//index of the option clicked
-		// const option = parseInt(e.target.getAttribute("value"));
-		// setPathfindingAlgorithm(pathFindingOptions[option]);
-		// onPathfind(option);
 		setPathfindingOption(parseInt(e.target.getAttribute("value")));
 		setGenerationOption(-1);
 	}
@@ -37,8 +30,15 @@ function ControlSection(props) {
 		}
 	}
 
-	function handleGridDimsChange() {
-		onGridDimsChange(parseInt(rowsInputRef.current.value), parseInt(colsInputRef.current.value));
+	function handleGridDimsChange(rows, cols) {
+		const dims = { rows: parseInt(rows), cols: parseInt(cols) };
+		setGridDims(dims);
+		onGridDimsChange(dims);
+	}
+
+	function handleSpeedChange(newSpeed) {
+		setAnimSpeed(parseInt(newSpeed));
+		onSpeedChange(parseInt(newSpeed));
 	}
 
 	const generationAlgorithms = ["DFS Algorithm", "Recursive Division", "Prim's Algorithm"];
@@ -52,7 +52,7 @@ function ControlSection(props) {
 	const generationAlgorithmsDescriptions = [
 		"generates a maze by randomly exploring the grid using depth-first search",
 		"generates a maze by recursively dividing the grid with walls, creating passages through random openings",
-		"generates a maze by repeatedly adding the nearest unvisited cell to the maze",
+		"generates a maze by repeatedly adding the nearest empty cell to the maze",
 	];
 	const pathfindingAlgorithmsDescriptions = [
 		"does not guarantee the shortest path and is slow",
@@ -62,21 +62,23 @@ function ControlSection(props) {
 		"does not guarantee the shortest but can be fast",
 	];
 
+	const pathfindingAlgorithmsShort = ["DFS", "BFS", "A*", "Dijkstra's", "Greedy BFS"];
+	const generationAlgorithmsShort = ["DFS", "Recursive Division", "Prim's"];
+
 	const getDescription = () => {
 		if (generationOption === -1 && pathfindingOption === -1) {
-			return "Pick an algorithm to generate a maze or find a path!";
+			return "Pick a maze generation or pathfinding algorithm!";
 		} else if (generationOption !== -1) {
 			return (
 				<div>
-					<strong>{generationAlgorithms[generationOption]}</strong>{" "}
-					{generationAlgorithmsDescriptions[generationOption]}
+					<u>{generationAlgorithms[generationOption]}</u> {generationAlgorithmsDescriptions[generationOption]}
 				</div>
 			);
 		} else {
 			return (
 				<div>
-					<strong>{pathfindingAlgorithms[generationOption]}</strong>{" "}
-					{pathfindingAlgorithmsDescriptions[generationOption]}
+					<u>{pathfindingAlgorithms[pathfindingOption]}</u>{" "}
+					{pathfindingAlgorithmsDescriptions[pathfindingOption]}
 				</div>
 			);
 		}
@@ -85,55 +87,84 @@ function ControlSection(props) {
 		<section className="control-section">
 			<section className="top-bar">
 				<div className="app-title">Pathfinding Visualizer</div>
+				<div className="vertical-separator"></div>
 				<DropDown
 					title="Maze Generation"
 					options={generationAlgorithms}
 					onOptionClick={handleGenerationOptionClick}
 				></DropDown>
 				<DropDown
-					title="Path Finding"
+					title=" Path Finding"
 					options={pathfindingAlgorithms}
 					onOptionClick={handlePathfindingOptionClick}
 				></DropDown>
 
 				<button
-					style={{
-						backgroundColor: generationOption === -1 && pathfindingOption === -1 ? "grey" : "green",
-					}}
 					disabled={pathfindingOption === -1 && generationOption === -1}
 					onClick={handleStartClick}
 					className="start-btn"
 				>
 					{generationOption !== -1
-						? "Generate Maze!"
+						? `Generate ${generationAlgorithmsShort[generationOption]}!`
 						: pathfindingOption !== -1
-						? "Find Path!"
-						: "Select an Algorithm"}
+						? `Pathfind ${pathfindingAlgorithmsShort[pathfindingOption]}!`
+						: "Pick Algorithm"}
 				</button>
 
 				<button onClick={onClearCanvas} className="clear-btn">
 					Clear
 				</button>
+
+				<InputDropdown
+					title={"Speed: " + (21 - animSpeed)}
+					type="slider"
+					onInputChange={handleSpeedChange}
+				></InputDropdown>
+				<InputDropdown
+					title={`Grid: [${gridDims.rows} x ${gridDims.cols}] `}
+					type="input"
+					onInputChange={handleGridDimsChange}
+				></InputDropdown>
 			</section>
 
-			<section className="top-section">
-				<section className="display-section">
+			<section className="top-description-section">
+				{/*Cells legend */}
+				<section className="cell-info-section">
+					<div className="cell-segment">
+						<div>Wall Node: </div>
+						<div style={{ backgroundColor: renderer.wallColor }} className="cell-disp"></div>
+					</div>
+					<div className="cell-segment">
+						<div>Empty Node: </div>
+						<div style={{ backgroundColor: renderer.pathColor }} className="cell-disp"></div>
+					</div>
+					<div className="cell-segment">
+						<div>Start Node: </div>
+						<div style={{ backgroundColor: renderer.startColor }} className="cell-disp"></div>
+					</div>
+					<div className="cell-segment">
+						<div>Goal Node: </div>
+						<div style={{ backgroundColor: renderer.endColor }} className="cell-disp"></div>
+					</div>
+					<div className="cell-segment">
+						<div>Explored Node: </div>
+						<div style={{ backgroundColor: renderer.exploredColor }} className="cell-disp"></div>
+					</div>
+					<div className="cell-segment">
+						<div>Solution Node: </div>
+						<div style={{ backgroundColor: renderer.solutionColor }} className="cell-disp"></div>
+					</div>
+				</section>
+
+				<section className="states-info-section">
 					<section className="states-info">
-						<div>States Explored: {numStates.explored}</div>
+						<div>Nodes Explored: {numStates.explored}</div>
 						{numStates.solution === -1 ? (
 							<div style={{ color: "red" }}>No Solution</div>
 						) : (
-							<div>Solution States: {numStates.solution}</div>
+							<div>Solution Nodes: {numStates.solution}</div>
 						)}
 					</section>
-				</section>
-
-				<section className="settings-section">
-					<label htmlFor="rows-input">Rows: </label>
-					<input ref={rowsInputRef} type="number" id="rows-input" min="10" max="50" defaultValue="19" />
-					<label htmlFor="cols-input">Columns: </label>
-					<input ref={colsInputRef} type="number" id="cols-input" min="10" max="100" defaultValue="50" />
-					<button onClick={handleGridDimsChange}>Apply</button>
 				</section>
 			</section>
 
