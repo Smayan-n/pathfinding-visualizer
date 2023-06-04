@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { render } from "react-dom";
 import "../styles/ControlSection.css";
 import DropDown from "./Dropdown";
 import InputDropdown from "./InputDropdown";
@@ -13,13 +14,17 @@ function ControlSection(props) {
 	const [gridDims, setGridDims] = useState({ rows: 18, cols: 50 });
 
 	function handleGenerationOptionClick(e) {
-		setGenerationOption(parseInt(e.target.getAttribute("value")));
-		setPathfindingOption(-1);
+		if (!renderer.visualizationRunning) {
+			setGenerationOption(parseInt(e.target.getAttribute("value")));
+			setPathfindingOption(-1);
+		}
 	}
 
 	function handlePathfindingOptionClick(e) {
-		setPathfindingOption(parseInt(e.target.getAttribute("value")));
-		setGenerationOption(-1);
+		if (!renderer.visualizationRunning) {
+			setPathfindingOption(parseInt(e.target.getAttribute("value")));
+			setGenerationOption(-1);
+		}
 	}
 
 	function handleStartClick() {
@@ -62,8 +67,8 @@ function ControlSection(props) {
 		"does not guarantee the shortest but can be fast",
 	];
 
-	const pathfindingAlgorithmsShort = ["DFS", "BFS", "A*", "Dijkstra's", "Greedy BFS"];
-	const generationAlgorithmsShort = ["DFS", "Recursive Division", "Prim's"];
+	const pathfindingAlgorithmsShort = ["DFS", "BFS", "A*", "Dijkstra's", "Greedy"];
+	const generationAlgorithmsShort = ["DFS", "Recursive", "Prim's"];
 
 	const getDescription = () => {
 		if (generationOption === -1 && pathfindingOption === -1) {
@@ -94,13 +99,14 @@ function ControlSection(props) {
 					onOptionClick={handleGenerationOptionClick}
 				></DropDown>
 				<DropDown
-					title=" Path Finding"
+					title="Path Finding"
 					options={pathfindingAlgorithms}
 					onOptionClick={handlePathfindingOptionClick}
 				></DropDown>
 
 				<button
-					disabled={pathfindingOption === -1 && generationOption === -1}
+					style={{ backgroundColor: renderer.visualizationRunning ? "gray" : "green" }}
+					disabled={(pathfindingOption === -1 && generationOption === -1) || renderer.visualizationRunning}
 					onClick={handleStartClick}
 					className="start-btn"
 				>
@@ -111,7 +117,7 @@ function ControlSection(props) {
 						: "Pick Algorithm"}
 				</button>
 
-				<button onClick={onClearCanvas} className="clear-btn">
+				<button disabled={renderer.visualizationRunning} onClick={onClearCanvas} className="clear-btn">
 					Clear
 				</button>
 
@@ -119,11 +125,13 @@ function ControlSection(props) {
 					title={"Speed: " + (21 - animSpeed)}
 					type="slider"
 					onInputChange={handleSpeedChange}
+					visualizationRunning={renderer.visualizationRunning}
 				></InputDropdown>
 				<InputDropdown
 					title={`Grid: [${gridDims.rows} x ${gridDims.cols}] `}
 					type="input"
 					onInputChange={handleGridDimsChange}
+					visualizationRunning={renderer.visualizationRunning}
 				></InputDropdown>
 			</section>
 

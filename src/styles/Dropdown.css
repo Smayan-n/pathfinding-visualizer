@@ -11,7 +11,7 @@
     cursor: pointer;
     font-family: poppins;
     font-size: 1.45vw;
-    background-color: rgb(47, 46, 46);
+    background-color: var(--bar-bg-color);
     border: none;
     transition: 0.7s color;
     

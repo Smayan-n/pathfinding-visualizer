@@ -8,6 +8,7 @@ class CanvasRenderer {
 
 		this.animationQueue = [];
 		this.animationRunning = false;
+		this.visualizationRunning = false; //visualization for generation/pathfinding - used by client
 		this.animSpeed = 10; //speed for one cell animation in milliseconds - lower is faster
 
 		this.wallColor = "rgb(34, 61, 112)";
@@ -76,6 +77,7 @@ class CanvasRenderer {
 
 	//animates a given array of states to given type
 	queueStatesAnimation(states, type, animSpeed, onNumStatesChange) {
+		//NOTE: animSpeed custom parameter is not used rn
 		//make sure states is not empty
 		if (states.length === 0)
 			return new Promise((resolve) => {
@@ -101,7 +103,7 @@ class CanvasRenderer {
 					clearInterval(interval);
 					resolve(true);
 				}
-			}, animSpeed);
+			}, this.animSpeed * 2);
 		});
 	}
 
@@ -155,24 +157,11 @@ class CanvasRenderer {
 					const pos = this.maze.getCellPos(animation.cell.index);
 
 					//colors
-					const from = { red: 255, green: 0, blue: 0 };
-					const red = lerp(34, from.red, animation.i / this.maze.cellSize);
-					const green = lerp(61, from.green, animation.i / this.maze.cellSize);
-					const blue = lerp(112, from.blue, animation.i / this.maze.cellSize);
-
-					// const heuristic =
-					// 	Math.abs(animation.cell.index.row - this.maze.end.row) +
-					// 	Math.abs(animation.cell.index.col - this.maze.end.col);
-
-					// const actualCost =
-					// 	Math.abs(animation.cell.index.row - this.maze.start.row) +
-					// 	Math.abs(animation.cell.index.col - this.maze.start.col);
-
-					// let tieBreaker = Math.sqrt(
-					// 	Math.pow(animation.cell.index.row - this.maze.end.row, 2) +
-					// 		Math.pow(animation.cell.index.col - this.maze.end.col, 2)
-					// );
-					// tieBreaker = tieBreaker.toFixed(2);
+					const from = { red: 255, green: 255, blue: 255 };
+					const to = { red: 219, green: 169, blue: 51 };
+					const red = lerp(from.red, to.red, animation.i / this.maze.cellSize);
+					const green = lerp(from.green, to.green, animation.i / this.maze.cellSize);
+					const blue = lerp(from.blue, to.blue, animation.i / this.maze.cellSize);
 
 					this.simpleCanvas.rect(
 						pos.x + animation.i / 2,
@@ -182,6 +171,7 @@ class CanvasRenderer {
 						"",
 						this.typeColorMap[animation.cell.type],
 						// animation.i > 0 ? `rgba(${50}, ${color}, ${color - 40}, 1)` : `rgba(${50}, ${240}, ${240}, 1)`,
+
 						true, //fill?
 						animation.i > 0 //round?
 					);

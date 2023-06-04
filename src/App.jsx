@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CanvasSection from "./components/CanvasSection.jsx";
 import ControlSection from "./components/ControlSection.jsx";
+import Popup from "./components/Popup.jsx";
 import Maze from "./scripts/Maze.js";
 import CanvasRenderer from "./scripts/Renderer.js";
 import { randInt } from "./scripts/Utility.js";
@@ -21,6 +22,12 @@ function App() {
 	const [numStates, setNumStates] = useState({ explored: 0, solution: 0 });
 
 	const [dimsChange, setDimsChange] = useState(0);
+
+	const [showPopup, setShowPopup] = useState(false);
+
+	function handleClosePopup() {
+		setShowPopup(false);
+	}
 
 	function handleGridDimsChange(dims) {
 		console.log(dims);
@@ -118,6 +125,7 @@ function App() {
 				clearCanvasProps={[clearCanvas, handleClearCanvas]}
 				onNumStatesChange={handleNumStatesChange}
 			></CanvasSection>
+			{showPopup ? <Popup isOpen={showPopup} onClose={handleClosePopup}></Popup> : null}
 		</section>
 	);
 }

@@ -43,6 +43,9 @@ function CanvasSection(props) {
 	//for maze generation
 	useEffect(() => {
 		const generateMaze = async () => {
+			renderer.visualizationRunning = true;
+			//call onNumStatesChange to update and re-render ControlSection
+			onNumStatesChange({ explored: 0, solution: 0 });
 			//clear or fill cells depending on algorithm
 			if (generated.option == 0 || generated.option == 2) {
 				maze.fillCells();
@@ -52,7 +55,10 @@ function CanvasSection(props) {
 				await renderer.queueFullAnimation("clear");
 			}
 
-			await renderer.queueStatesAnimation(generated.generated, generated.option == 1 ? "wall" : "path", 10);
+			await renderer.queueStatesAnimation(generated.generated, generated.option == 1 ? "wall" : "path", 15);
+
+			renderer.visualizationRunning = false;
+			onNumStatesChange({ explored: 0, solution: 0 });
 		};
 		if (generated) generateMaze();
 	}, [generated]);
@@ -60,6 +66,8 @@ function CanvasSection(props) {
 	//for pathfinding
 	useEffect(() => {
 		const pathfind = async () => {
+			renderer.visualizationRunning = true;
+
 			//clear all explored and solution cells
 			maze.clearCells("explored");
 			maze.clearCells("solution");
@@ -71,14 +79,15 @@ function CanvasSection(props) {
 				if (solution) {
 					await renderer.queueStatesAnimation(explored, "explored", 15, onNumStatesChange);
 					//to ensure complete animation
-					setTimeout(
-						async () => await renderer.queueStatesAnimation(solution, "solution", 25, onNumStatesChange),
-						50
-					);
+					setTimeout(async () => {
+						await renderer.queueStatesAnimation(solution, "solution", 25, onNumStatesChange);
+						renderer.visualizationRunning = false;
+					}, 50);
 					//if there is no solution, just animate all explored cells.
 				} else {
 					await renderer.queueStatesAnimation(explored, "explored", 15, onNumStatesChange);
 					onNumStatesChange({ explored: explored.length, solution: -1 });
+					renderer.visualizationRunning = false;
 				}
 			}, 100);
 		};
@@ -104,14 +113,19 @@ function CanvasSection(props) {
 
 	//callback function that runs when mouse button is pressed and mouse is moving on canvas - loop function
 	function handleDraw(ctx, point, prevPoint, mouseDown, rightClick) {
-		//for changing cursor on hover
-		if (indexEquals(maze.start, maze.getCellIndex(point)) || indexEquals(maze.end, maze.getCellIndex(point))) {
+		//for changing cursor on hover over start and end cells
+		if (renderer.visualizationRunning) {
+			canvasRef.current.style.cursor = "default";
+		} else if (
+			indexEquals(maze.start, maze.getCellIndex(point)) ||
+			indexEquals(maze.end, maze.getCellIndex(point))
+		) {
 			canvasRef.current.style.cursor = "grabbing";
 		} else {
-			canvasRef.current.style.cursor = "pointer";
+			canvasRef.current.style.cursor = "crosshair";
 		}
 
-		if (mouseDown) {
+		if (mouseDown && !renderer.visualizationRunning) {
 			prevPoint = prevPoint ? prevPoint : point;
 			const points = interpolate(prevPoint, point, 0.1);
 
@@ -130,14 +144,14 @@ function CanvasSection(props) {
 					const oldStart = maze.setStart(index);
 					// renderer.drawCell(oldStart);
 					// renderer.drawCell(index);
-					renderer.queueAnimation(oldStart, 15);
-					renderer.queueAnimation(index, 15);
+					renderer.queueAnimation(oldStart, 10);
+					renderer.queueAnimation(index, 10);
 					return;
 				}
 				if (maze.onEndClick) {
 					const oldEnd = maze.setEnd(index);
-					renderer.queueAnimation(oldEnd, 15);
-					renderer.queueAnimation(index, 15);
+					renderer.queueAnimation(oldEnd, 10);
+					renderer.queueAnimation(index, 10);
 					return;
 				}
 
