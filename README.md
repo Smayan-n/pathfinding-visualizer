@@ -1,12 +1,12 @@
 Welcome to the Pathfinding-visualizer GitHub repository! 
-This react application allows you visualize different pathfinding and maze-generation algorithms
+This react application allows you visualize different pathfinding and maze-generation algorithms with fun animations!
 
 # Features: #
 * A resizable grid that you can draw custom mazes on:
   * Mouse left click to add a wall
-  * Mouse right clcick to remove a node
-* Ability to hover and drag start and end nodes anywhere on grid
-* A speed slider that changes the visualization speed of the algorithms
+  * Mouse right click to remove a node
+  * Hover and drag start and end nodes anywhere on gird
+* A speed slider that changes the animation speed of visualizations
 * A variety of pathfinding algorithms:
   * Depth-First Search
   * Breadth-First Search
