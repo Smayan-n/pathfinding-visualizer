@@ -21,6 +21,6 @@ This react application allows you visualize different pathfinding and maze-gener
 
 # Usage: #
 * visit the github page for this repo: https://smayan-n.github.io/pathfinding-visualizer/
-* Download or clone this repository and run `yarn run dev`
+* Download or clone this repository and run `yarn` to install all modules. Then run `yarn run dev` to view site
 
 ![image](https://github.com/Smayan-n/pathfinding-visualizer/assets/86111841/b498ee96-0d71-4b6f-8618-2193ee3799ec)
