@@ -1,7 +1,6 @@
 import { useState } from "react";
 import CanvasSection from "./components/CanvasSection.jsx";
 import ControlSection from "./components/ControlSection.jsx";
-import Popup from "./components/Popup.jsx";
 import Maze from "./scripts/Maze.js";
 import CanvasRenderer from "./scripts/Renderer.js";
 import { randInt } from "./scripts/Utility.js";
@@ -33,27 +32,6 @@ function App() {
 		console.log(dims);
 		maze.setDimensions(dims.rows, dims.cols);
 		setDimsChange(!dimsChange);
-
-		// try {
-		// 	let result;
-		// 	eval(
-		// 		`function evalFunc(x){
-		// 			if(x <= 0){
-		// 				console.log('base case')
-		// 			}
-		// 			else{
-		// 				console.log(x);
-		// 				evalFunc(x - 1);
-		// 			}
-		// 		}
-		// 		evalFunc(10);
-		// 		result = 10;
-		// 		`
-		// 	);
-		// 	console.log("eval return:" + result);
-		// } catch (err) {
-		// 	console.log(err);
-		// }
 	}
 
 	function handleNumStatesChange(changed) {
@@ -125,7 +103,6 @@ function App() {
 				clearCanvasProps={[clearCanvas, handleClearCanvas]}
 				onNumStatesChange={handleNumStatesChange}
 			></CanvasSection>
-			{showPopup ? <Popup isOpen={showPopup} onClose={handleClosePopup}></Popup> : null}
 		</section>
 	);
 }
